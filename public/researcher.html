@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coach Alex · Forschungskonsole</title>
+<link rel="icon" href="/favicon.png" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/styles.css" />
+<style>
+  /* ---------- login ---------- */
+  #login { height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 20px;
+           background: radial-gradient(1000px 500px at 50% -10%, #eef0fe 0%, var(--bg) 55%); }
+  #login .sheet { width: 360px; padding: 34px 30px; text-align: center; }
+  #login .avatar { width: 60px; height: 60px; font-size: 24px; margin: 0 auto 16px; }
+  #login h1 { font-size: 21px; margin: 0 0 4px; letter-spacing: -.02em; }
+  #login p { color: var(--muted); font-size: 13.5px; margin: 0 0 22px; }
+  #loginErr { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 10px; }
+
+  /* ---------- app shell ---------- */
+  #app { display: none; height: 100dvh; grid-template-columns: 340px 1fr; }
+  #app.on { display: grid; }
+
+  aside { background: var(--panel); border-right: 1px solid var(--line); display: flex;
+          flex-direction: column; min-height: 0; }
+  .brand { display: flex; align-items: center; gap: 12px; padding: 18px 18px 16px; }
+  .brand .avatar { width: 42px; height: 42px; font-size: 16px; }
+  .brand .t1 { font-weight: 600; font-size: 15.5px; letter-spacing: -.01em; }
+  .brand .t2 { font-size: 12px; color: var(--muted); }
+  .side-actions { padding: 0 16px 14px; }
+  .side-actions .btn { width: 100%; }
+
+  .nav { padding: 0 10px; }
+  .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: var(--r-sm);
+              cursor: pointer; color: var(--ink-2); font-weight: 600; font-size: 14px; }
+  .nav-item:hover { background: var(--line-2); }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand-strong); }
+  .nav-item .ic { width: 18px; height: 18px; flex: none; }
+  .nav-item .count { margin-left: auto; background: var(--danger); color: #fff; font-size: 11px;
+                     font-weight: 700; border-radius: 20px; padding: 1px 8px; min-width: 20px; text-align: center; }
+  .nav-item .count.zero { display: none; }
+
+  .list-label { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+                color: var(--muted); padding: 16px 22px 8px; }
+  #list { overflow-y: auto; flex: 1; padding: 0 10px 12px; }
+  .conv { padding: 11px 12px; border-radius: var(--r-sm); cursor: pointer; transition: background .12s; }
+  .conv:hover { background: var(--line-2); }
+  .conv.active { background: var(--brand-soft); }
+  .conv .l1 { display: flex; align-items: center; gap: 8px; }
+  .conv .label { font-weight: 600; font-size: 14px; color: var(--ink); overflow: hidden;
+                 text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .conv .wait-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex: none;
+                    box-shadow: 0 0 0 3px var(--warn-soft); }
+  .conv .preview { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis;
+                   white-space: nowrap; margin-top: 3px; }
+  .side-foot { border-top: 1px solid var(--line); padding: 10px; display: flex; gap: 8px; }
+  .side-foot .btn { flex: 1; }
+
+  /* ---------- main ---------- */
+  main { display: flex; flex-direction: column; min-height: 0; background: var(--bg); }
+  .main-head { display: flex; align-items: center; gap: 12px; padding: 15px 22px; background: #fff;
+               border-bottom: 1px solid var(--line); min-height: 66px; }
+  .main-head .avatar { width: 38px; height: 38px; font-size: 14px; }
+  .mh-title { font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+  .mh-sub { font-size: 12px; color: var(--muted); font-family: ui-monospace, monospace; }
+  .mh-link { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .mh-link a { color: var(--muted); text-decoration: none; overflow: hidden;
+               text-overflow: ellipsis; white-space: nowrap; }
+  .mh-link a:hover { color: var(--brand-strong); text-decoration: underline; }
+  .link-copy { border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+               font-family: var(--font); font-size: 11px; font-weight: 600; border-radius: 6px;
+               padding: 1px 8px; cursor: pointer; flex: none; }
+  .link-copy:hover { background: var(--line-2); color: var(--ink); }
+  .mobile-back { display: none; }
+
+  /* overview */
+  #overview { flex: 1; overflow-y: auto; padding: 26px; }
+  #overview .h { font-size: 13px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+                 color: var(--muted); margin: 0 0 14px; }
+  .funnel { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px;
+            margin-bottom: 30px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 20px 22px;
+          box-shadow: var(--sh-sm); }
+  .stat .num { font-size: 34px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .stat .lab { font-size: 13px; color: var(--ink-2); margin-top: 8px; font-weight: 600; }
+  .stat .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .arrow { color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px;
+           font-size: 12px; font-weight: 600; }
+  .arrow svg { width: 22px; height: 22px; }
+
+  .queue-card { background: #fff; border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh-sm);
+                overflow: hidden; }
+  .queue-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line-2); }
+  .queue-head h3 { margin: 0; font-size: 15px; }
+  .queue-head .pill { background: var(--warn-soft); color: var(--warn); font-weight: 700; font-size: 12px;
+                      padding: 2px 10px; border-radius: 20px; }
+  .qrow { display: flex; align-items: center; gap: 14px; padding: 14px 20px; cursor: pointer;
+          border-bottom: 1px solid var(--line-2); transition: background .12s; }
+  .qrow:last-child { border-bottom: none; }
+  .qrow:hover { background: var(--line-2); }
+  .qrow .avatar { width: 40px; height: 40px; font-size: 15px; }
+  .qrow .qmid { flex: 1; min-width: 0; }
+  .qrow .qname { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .qrow .qprev { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qrow .qwait { text-align: right; font-size: 13px; font-weight: 600; color: var(--warn); white-space: nowrap; }
+  .qrow .qwait span { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
+  .queue-empty { padding: 44px 20px; text-align: center; color: var(--muted); }
+  .queue-empty .big { font-size: 30px; margin-bottom: 8px; }
+
+  /* thread */
+  #thread { flex: 1; overflow-y: auto; padding: 22px 26px; display: flex; flex-direction: column; gap: 2px; }
+  .trow { display: flex; margin-top: 12px; }
+  .trow.assistant { justify-content: flex-end; }
+  .tbubble { max-width: 64%; }
+  .tbubble .b { padding: 10px 14px; font-size: 14.5px; line-height: 1.45; white-space: pre-wrap;
+                word-wrap: break-word; }
+  .user .b { background: #fff; border: 1px solid var(--line); border-radius: 16px 16px 16px 4px; box-shadow: var(--sh-sm); }
+  .assistant .b { background: var(--brand-grad); color: #fff; border-radius: 16px 16px 4px 16px;
+                  box-shadow: 0 3px 12px rgba(79,70,229,.25); }
+  .tmeta { font-size: 11px; color: var(--muted); margin-top: 5px; display: flex; gap: 7px; align-items: center; }
+  .assistant .tmeta { justify-content: flex-end; }
+  .tmeta .who { font-weight: 600; }
+  .tmeta .who.ai { color: #6d28d9; }
+  .tmeta .who.researcher { color: var(--ok); }
+  .tmeta .sched { background: var(--warn-soft); color: var(--warn); padding: 1px 7px; border-radius: 10px; font-weight: 600; }
+
+  .composer { border-top: 1px solid var(--line); background: #fff; padding: 14px 20px 18px; }
+  .composer form { display: flex; gap: 10px; align-items: flex-end; background: var(--line-2);
+                   border: 1px solid var(--line); border-radius: var(--r-lg); padding: 6px 6px 6px 10px; }
+  .composer form:focus-within { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,.12); background: #fff; }
+  .composer textarea { flex: 1; resize: none; border: none; background: transparent; font: inherit;
+                       padding: 8px 4px; max-height: 160px; color: var(--ink); }
+  .composer textarea:focus { outline: none; }
+  .composer .hint { font-size: 12px; color: var(--muted); padding: 0 4px 8px; }
+  .send { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; flex: none;
+          background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 3px 10px rgba(79,70,229,.3); }
+  .send:hover:not(:disabled) { background: var(--brand-strong); }
+  .send:disabled { opacity: .4; cursor: default; box-shadow: none; }
+
+  .placeholder { margin: auto; text-align: center; color: var(--muted); padding: 40px; }
+  .invite-out { margin-top: 18px; padding: 14px 16px; background: var(--brand-soft); border-radius: var(--r-sm);
+                font-size: 13.5px; word-break: break-all; }
+  .invite-out a { color: var(--brand-strong); font-weight: 600; }
+  .invite-link-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+
+  @media (max-width: 820px) {
+    #app.on { grid-template-columns: 1fr; }
+    aside { display: flex; }
+    #app.on.viewing aside { display: none; }
+    #app.on:not(.viewing) main { display: none; }
+    .mobile-back { display: inline-flex; }
+    .funnel { grid-template-columns: 1fr; }
+    .arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="sheet card">
+    <div class="avatar">A</div>
+    <h1>Coach Alex</h1>
+    <p>Forschungskonsole</p>
+    <input id="pw" class="input" type="password" placeholder="Forschungs-Passwort" style="text-align:center;" />
+    <button id="loginBtn" class="btn btn-primary" style="width:100%;margin-top:14px;">Anmelden</button>
+    <div id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <aside>
+    <div class="brand">
+      <div class="avatar">A</div>
+      <div>
+        <div class="t1">Coach Alex</div>
+        <div class="t2">Forschungskonsole</div>
+      </div>
+    </div>
+    <div class="side-actions">
+      <button class="btn btn-primary" id="newInviteBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Neuer Einladungslink
+      </button>
+    </div>
+    <div class="nav">
+      <div class="nav-item" id="navOverview">
+        <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9zm10 7h6V4h-6v16zM4 20h6v-5H4v5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Übersicht
+        <span class="count zero" id="waitCount">0</span>
+      </div>
+    </div>
+    <div class="list-label">Gespräche</div>
+    <div id="list"></div>
+    <div class="side-foot">
+      <button class="btn btn-ghost btn-sm" id="settingsBtn">Einstellungen</button>
+      <button class="btn btn-ghost btn-sm" id="exportJsonBtn">JSON</button>
+      <button class="btn btn-ghost btn-sm" id="exportCsvBtn">CSV</button>
+    </div>
+  </aside>
+
+  <main>
+    <!-- OVERVIEW -->
+    <div id="overviewWrap" style="display:flex;flex-direction:column;min-height:0;flex:1;">
+      <div class="main-head">
+        <button class="btn btn-ghost btn-sm mobile-back" data-back>‹ Zurück</button>
+        <div>
+          <div class="mh-title">Übersicht</div>
+          <div class="mh-sub" style="font-family:var(--font);">Live-Studienbetrieb</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="refreshBtn" style="margin-left:auto;">Aktualisieren</button>
+      </div>
+      <div id="overview">
+        <p class="h">Teilnehmer-Funnel</p>
+        <div class="funnel" id="funnel"></div>
+        <div class="queue-card">
+          <div class="queue-head">
+            <h3>Wartet auf Antwort</h3>
+            <span class="pill" id="queuePill">0</span>
+          </div>
+          <div id="queue"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THREAD -->
+    <div id="threadWrap" style="display:none;flex-direction:column;min-height:0;flex:1;">
+      <div class="main-head">
+        <button class="btn btn-ghost btn-sm mobile-back" data-back>‹</button>
+        <div class="avatar">A</div>
+        <div style="min-width:0;">
+          <div class="mh-title" id="hLabel"></div>
+          <div class="mh-sub mh-link">
+            <a id="hLink" target="_blank" rel="noopener"></a>
+            <button class="link-copy" id="hCopy" type="button" title="Einladungslink kopieren">Kopieren</button>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:12px;color:var(--muted);font-weight:600;">Modus</span>
+          <div class="segmented" id="modeToggle">
+            <button data-mode="ai">KI</button>
+            <button data-mode="human">Mensch</button>
+          </div>
+        </div>
+      </div>
+      <div id="thread"></div>
+      <div class="composer">
+        <div class="hint" id="composerHint"></div>
+        <form id="replyForm">
+          <textarea id="replyInput" rows="1" placeholder="Als Coach Alex antworten…"></textarea>
+          <button class="send" type="submit" aria-label="Senden">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 12l15-7-6 15-2.5-6L4 12z" fill="currentColor"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ================= INVITE MODAL ================= -->
+<div class="modal" id="inviteModal">
+  <div class="sheet">
+    <h2>Neuer Einladungslink</h2>
+    <p class="sub">Erstelle einen privaten Link für eine teilnehmende Person.</p>
+    <label class="lbl">Modus</label>
+    <div class="segmented" id="inviteMode" style="width:100%;">
+      <button data-mode="ai" class="on" style="flex:1;">KI · automatisch</button>
+      <button data-mode="human" style="flex:1;">Mensch · du antwortest</button>
+    </div>
+    <label class="lbl">Bezeichnung <span style="font-weight:400;color:var(--muted);">— nur für dich sichtbar</span></label>
+    <input id="inviteLabel" class="input" placeholder="z. B. Teilnehmer 07 · Bedingung A" />
+    <label class="lbl">System-Prompt-Überschreibung <span style="font-weight:400;color:var(--muted);">— optional, leer = global</span></label>
+    <textarea id="invitePrompt" class="input" style="min-height:96px;resize:vertical;"></textarea>
+    <div class="invite-out hidden" id="inviteOut"></div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="inviteClose">Schließen</button>
+      <button class="btn btn-primary" id="inviteCreate">Link erstellen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal" id="settingsModal">
+  <div class="sheet">
+    <h2>Globale Einstellungen</h2>
+    <p class="sub">Gilt für jedes KI-Gespräch ohne eigene Überschreibung.</p>
+    <label class="lbl">Globaler System-Prompt</label>
+    <textarea id="cfgPrompt" class="input" style="min-height:150px;resize:vertical;"></textarea>
+    <label class="lbl">OpenAI-Modell</label>
+    <input id="cfgModel" class="input" />
+    <div class="actions">
+      <button class="btn btn-ghost" id="settingsClose">Schließen</button>
+      <button class="btn btn-primary" id="settingsSave">Änderungen speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let PW = sessionStorage.getItem("alex_pw") || "";
+let currentId = null;
+let view = "overview"; // 'overview' | 'thread'
+let threadTimer = null, overviewTimer = null;
+
+const $ = (id) => document.getElementById(id);
+async function api(path, opts = {}) {
+  opts.headers = Object.assign({ "x-researcher-auth": PW }, opts.headers || {});
+  return fetch(path, opts);
+}
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+const MODE_LABEL = { ai: "KI", human: "Mensch" };
+const SENDER_LABEL = { participant: "Teilnehmer", ai: "KI", researcher: "Forscher" };
+function modeLabel(m) { return MODE_LABEL[m] || m; }
+function fmtWait(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return "gerade eben";
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + " Min";
+  const h = Math.floor(m / 60);
+  const rm = m % 60;
+  if (h < 24) return rm ? `${h} Std ${rm} Min` : `${h} Std`;
+  return Math.floor(h / 24) + " T";
+}
+
+/* ---------- login ---------- */
+async function doLogin(pw) {
+  const r = await fetch("/api/researcher/login", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ password: pw }),
+  });
+  if (r.ok) { PW = pw; sessionStorage.setItem("alex_pw", pw); showApp(); return true; }
+  return false;
+}
+$("loginBtn").addEventListener("click", async () => {
+  if (!(await doLogin($("pw").value))) $("loginErr").textContent = "Falsches Passwort.";
+});
+$("pw").addEventListener("keydown", (e) => { if (e.key === "Enter") $("loginBtn").click(); });
+
+function showApp() {
+  $("login").style.display = "none";
+  $("app").classList.add("on");
+  showOverview();
+  loadList();
+  setInterval(loadList, 4000);
+}
+
+/* ---------- view switching ---------- */
+function showOverview() {
+  view = "overview"; currentId = null;
+  $("overviewWrap").style.display = "flex";
+  $("threadWrap").style.display = "none";
+  $("navOverview").classList.add("active");
+  $("app").classList.remove("viewing");
+  document.querySelectorAll(".conv.active").forEach((e) => e.classList.remove("active"));
+  loadAnalytics();
+  if (threadTimer) clearInterval(threadTimer);
+  if (overviewTimer) clearInterval(overviewTimer);
+  overviewTimer = setInterval(loadAnalytics, 5000);
+}
+function showThread(id) {
+  view = "thread"; currentId = id;
+  $("overviewWrap").style.display = "none";
+  $("threadWrap").style.display = "flex";
+  $("navOverview").classList.remove("active");
+  $("app").classList.add("viewing");
+  if (overviewTimer) clearInterval(overviewTimer);
+  loadThread(true);
+  if (threadTimer) clearInterval(threadTimer);
+  threadTimer = setInterval(() => loadThread(false), 2500);
+  loadList();
+}
+$("navOverview").addEventListener("click", showOverview);
+$("refreshBtn").addEventListener("click", loadAnalytics);
+document.querySelectorAll("[data-back]").forEach((b) =>
+  b.addEventListener("click", () => { $("app").classList.remove("viewing"); }));
+
+/* ---------- analytics (funnel + queue) ---------- */
+async function loadAnalytics() {
+  const r = await api("/api/researcher/analytics");
+  if (!r.ok) return;
+  const { funnel, queue } = await r.json();
+
+  const convPct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  const arrow = (pct) =>
+    `<div class="arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${pct}%</div>`;
+  $("funnel").innerHTML =
+    `<div class="stat"><div class="num">${funnel.invites}</div><div class="lab">Einladungen erstellt</div><div class="sub">Links generiert</div></div>`
+    + arrow(convPct(funnel.started, funnel.invites))
+    + `<div class="stat"><div class="num">${funnel.started}</div><div class="lab">Chats gestartet</div><div class="sub">≥ 1 Teilnehmernachricht</div></div>`
+    + arrow(convPct(funnel.completed, funnel.started))
+    + `<div class="stat"><div class="num">${funnel.completed}</div><div class="lab">Aktiv beteiligt</div><div class="sub">≥ ${funnel.completed_threshold} Teilnehmerantworten</div></div>`;
+
+  // reply queue
+  $("queuePill").textContent = queue.length;
+  const wc = $("waitCount");
+  wc.textContent = queue.length;
+  wc.classList.toggle("zero", queue.length === 0);
+  const q = $("queue");
+  if (!queue.length) {
+    q.innerHTML = '<div class="queue-empty"><div class="big">✅</div>Alles erledigt — niemand wartet.</div>';
+  } else {
+    q.innerHTML = queue.map((it) => `
+      <div class="qrow" data-id="${it.id}">
+        <div class="avatar">${escapeHtml((it.label || "?").slice(0,1).toUpperCase())}</div>
+        <div class="qmid">
+          <div class="qname">${escapeHtml(it.label || "Ohne Bezeichnung")}
+            <span class="badge badge-${it.mode} badge-dot">${modeLabel(it.mode)}</span></div>
+          <div class="qprev">${escapeHtml(it.last_content || "")}</div>
+        </div>
+        <div class="qwait">${fmtWait(it.waiting_ms)}<span>wartet</span></div>
+      </div>`).join("");
+    q.querySelectorAll(".qrow").forEach((row) =>
+      row.addEventListener("click", () => showThread(row.dataset.id)));
+  }
+}
+
+/* ---------- conversation list ---------- */
+async function loadList() {
+  const r = await api("/api/researcher/conversations");
+  if (!r.ok) return;
+  const { conversations } = await r.json();
+  const list = $("list");
+  list.innerHTML = conversations.map((c) => `
+    <div class="conv ${c.id === currentId ? "active" : ""}" data-id="${c.id}">
+      <div class="l1">
+        <span class="label">${escapeHtml(c.label || "Ohne Bezeichnung")}</span>
+        ${c.last_role === "user" ? '<span class="wait-dot" title="wartet auf Antwort"></span>' : ""}
+        <span class="badge badge-${c.mode} badge-dot">${modeLabel(c.mode)}</span>
+      </div>
+      <div class="preview">${c.msg_count} Nachr. · ${escapeHtml((c.last_content || "noch keine Nachrichten").slice(0, 52))}</div>
+    </div>`).join("");
+  list.querySelectorAll(".conv").forEach((el) =>
+    el.addEventListener("click", () => showThread(el.dataset.id)));
+}
+
+/* ---------- thread ---------- */
+async function loadThread(scroll) {
+  if (!currentId) return;
+  const r = await api("/api/researcher/conversation?id=" + encodeURIComponent(currentId));
+  if (!r.ok) return;
+  const { conversation, messages } = await r.json();
+  $("hLabel").textContent = conversation.label || "Ohne Bezeichnung";
+  const link = location.origin + "/?c=" + conversation.id;
+  $("hLink").href = link;
+  $("hLink").textContent = link;
+  [...$("modeToggle").children].forEach((b) => b.classList.toggle("on", b.dataset.mode === conversation.mode));
+  $("composerHint").textContent = conversation.mode === "ai"
+    ? "KI-Modus — Antworten erfolgen automatisch. Schreibe eine Nachricht, um manuell einzugreifen."
+    : "Mensch-Modus — deine Antwort wird als Coach Alex gesendet.";
+
+  const thread = $("thread");
+  const atBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 80;
+  thread.innerHTML = messages.map((m) => {
+    const scheduled = m.visible_at > Date.now();
+    return `<div class="trow ${m.role}"><div class="tbubble">
+      <div class="b">${escapeHtml(m.content)}</div>
+      <div class="tmeta"><span class="who ${m.sender}">${SENDER_LABEL[m.sender] || m.sender}</span>
+        ${scheduled ? '<span class="sched">geplant</span>' : ""}
+        <span>${new Date(m.created_at).toLocaleTimeString("de-DE", {hour:"2-digit",minute:"2-digit"})}</span>
+      </div></div></div>`;
+  }).join("");
+  if (scroll || atBottom) thread.scrollTop = thread.scrollHeight;
+}
+
+$("hCopy").addEventListener("click", () => {
+  if (!currentId) return;
+  navigator.clipboard.writeText(location.origin + "/?c=" + currentId);
+  $("hCopy").textContent = "Kopiert ✓";
+  setTimeout(() => { $("hCopy").textContent = "Kopieren"; }, 1500);
+});
+
+$("modeToggle").addEventListener("click", async (e) => {
+  const b = e.target.closest("button");
+  if (!b || !currentId) return;
+  await api("/api/researcher/update-conversation", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ id: currentId, mode: b.dataset.mode }),
+  });
+  loadThread(false); loadList();
+});
+
+$("replyForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = $("replyInput").value.trim();
+  if (!text || !currentId) return;
+  $("replyInput").value = ""; $("replyInput").style.height = "auto";
+  await api("/api/researcher/reply", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ id: currentId, content: text }),
+  });
+  loadThread(true); loadList();
+});
+$("replyInput").addEventListener("input", (e) => {
+  e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
+});
+$("replyInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("replyForm").requestSubmit(); }
+});
+
+/* ---------- invite modal ---------- */
+let inviteMode = "ai";
+$("newInviteBtn").addEventListener("click", () => {
+  $("inviteOut").classList.add("hidden"); $("inviteLabel").value = ""; $("invitePrompt").value = "";
+  inviteMode = "ai";
+  [...$("inviteMode").children].forEach((x) => x.classList.toggle("on", x.dataset.mode === "ai"));
+  $("inviteModal").classList.add("on");
+});
+$("inviteClose").addEventListener("click", () => $("inviteModal").classList.remove("on"));
+$("inviteMode").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  inviteMode = b.dataset.mode;
+  [...$("inviteMode").children].forEach((x) => x.classList.toggle("on", x === b));
+});
+$("inviteCreate").addEventListener("click", async () => {
+  const r = await api("/api/researcher/invite", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ mode: inviteMode, label: $("inviteLabel").value, system_prompt: $("invitePrompt").value || null }),
+  });
+  const { id } = await r.json();
+  const link = location.origin + "/?c=" + id;
+  const out = $("inviteOut");
+  out.classList.remove("hidden");
+  out.innerHTML = `<strong>${modeLabel(inviteMode)}-Einladung bereit</strong>
+    <div class="invite-link-row">
+      <a href="${link}" target="_blank" style="flex:1;">${link}</a>
+      <button class="btn btn-primary btn-sm" id="copyLink">Kopieren</button>
+    </div>`;
+  $("copyLink").addEventListener("click", (ev) => {
+    navigator.clipboard.writeText(link); ev.target.textContent = "Kopiert ✓";
+  });
+  loadList();
+});
+
+/* ---------- settings modal ---------- */
+$("settingsBtn").addEventListener("click", async () => {
+  const cfg = await (await api("/api/researcher/config")).json();
+  $("cfgPrompt").value = cfg.system_prompt || ""; $("cfgModel").value = cfg.model || "";
+  $("settingsModal").classList.add("on");
+});
+$("settingsClose").addEventListener("click", () => $("settingsModal").classList.remove("on"));
+$("settingsSave").addEventListener("click", async () => {
+  await api("/api/researcher/config", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ system_prompt: $("cfgPrompt").value, model: $("cfgModel").value }),
+  });
+  $("settingsModal").classList.remove("on");
+});
+
+/* ---------- export ---------- */
+async function download(format) {
+  const r = await api("/api/researcher/export?format=" + format);
+  const blob = await r.blob();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "coach-alex-export." + format; a.click();
+}
+$("exportJsonBtn").addEventListener("click", () => download("json"));
+$("exportCsvBtn").addEventListener("click", () => download("csv"));
+
+/* close modals on backdrop click */
+document.querySelectorAll(".modal").forEach((m) =>
+  m.addEventListener("click", (e) => { if (e.target === m) m.classList.remove("on"); }));
+
+if (PW) doLogin(PW).then((ok) => { if (!ok) { PW = ""; sessionStorage.removeItem("alex_pw"); } });
+</script>
+</body>
+</html>

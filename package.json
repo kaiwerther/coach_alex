@@ -1,0 +1,15 @@
+{
+  "name": "coach-alex",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Blind chat study tool: test persons chat with 'Coach Alex' (LLM or researcher).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 execute alex-db --local --file=./schema.sql",
+    "db:remote": "wrangler d1 execute alex-db --remote --file=./schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.106.0"
+  }
+}

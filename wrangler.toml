@@ -1,0 +1,25 @@
+name = "coach-alex"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Static pages live in ./public and are served for any non-/api path.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# D1 database for persistent data (conversations + messages + config).
+# For a fresh deploy: run `wrangler d1 create alex-db` and paste the returned
+# database_id below. The placeholder id works for local `wrangler dev`.
+[[d1_databases]]
+binding = "DB"
+database_name = "alex-db"
+database_id = "1853d3f4-b719-4ca1-a755-fc8445b70a6f"
+
+[vars]
+# Default OpenAI model (can also be overridden at runtime from the researcher UI).
+OPENAI_MODEL = "gpt-4o"
+
+# Secrets (do NOT put real values here) — set for production with:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put RESEARCHER_PASSWORD
+# For local dev they are read from .dev.vars
