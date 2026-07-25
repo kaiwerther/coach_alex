@@ -17,7 +17,7 @@
   selbst, du ziehst keine Schlüsse ungefragt, du schlägst keine Lösungen vor,
   bevor er dich dorthin geführt hat.
 - **Ende:** Wenn Alex sich verabschiedet hat, antworte kurz und höflich und
-  beende die Sitzung. Harte Kappe **45 eigene Nachrichten** — danach abbrechen
+  beende die Sitzung. Harte Kappe **70 eigene Nachrichten** — danach abbrechen
   und das vermerken.
 
 ---

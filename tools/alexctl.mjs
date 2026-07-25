@@ -74,8 +74,13 @@ async function invite() {
 
 async function send() {
   const id = process.argv[3];
-  const content = process.argv[4];
-  if (!id || !content) throw new Error("usage: send <id> <text>");
+  // "-" reads the message from stdin, so text with quotes, apostrophes or
+  // umlauts never has to survive shell quoting.
+  const content =
+    process.argv[4] === "-"
+      ? readFileSync(0, "utf8").trim()
+      : process.argv[4];
+  if (!id || !content) throw new Error("usage: send <id> <text|->");
 
   const before = (await api(`/api/researcher/conversation?id=${id}`)).messages;
   const lastId = before.length ? before[before.length - 1].id : 0;
@@ -127,7 +132,8 @@ async function list() {
   const prefix = arg("--prefix", "ZZ-PROMPTTEST");
   const { conversations } = await api("/api/researcher/conversations");
   const hits = conversations.filter((c) => (c.label || "").startsWith(prefix));
-  for (const c of hits) console.log(`${c.id}\t${c.message_count ?? "?"}\t${c.label}`);
+  hits.sort((a, b) => (a.label || "").localeCompare(b.label || ""));
+  for (const c of hits) console.log(`${c.id}\t${c.msg_count ?? 0} msgs\t${c.label}`);
   console.error(`${hits.length} of ${conversations.length} match "${prefix}"`);
 }
 

@@ -45,7 +45,8 @@ ist weg. Vor Lauf 1:
 - Export nach `prompts/coach-alex.v1.md` (= Baseline, unverändert).
 - Jede Revision wird eine neue Datei `v2`, `v3`, … + Eintrag in
   `prompts/CHANGELOG.md` mit Finding-ID pro Änderung.
-- Der jeweils aktuelle Stand wird vor jedem Lauf in die lokale D1 geschrieben.
+- Der jeweils aktuelle Stand geht als **Per-Chat-Override** in die Testgespräche,
+  nicht in den globalen Prompt.
 
 ### Schritt 0.2 — Statischer Prompt-Review
 
@@ -66,8 +67,11 @@ Trivialitäten verbrennt. Bereits identifiziert:
 
 ### Schritt 0.3 — Smoke-Test
 
-Ein Kurzgespräch (5 Turns) lokal, um zu bestätigen: Modell antwortet, Prompt
-greift, Sprache Deutsch, keine Infrastrukturfehler. Erst danach der volle Lauf.
+Ein Kurzgespräch, um zu bestätigen: Modell antwortet, Prompt greift, Sprache
+Deutsch, keine Infrastrukturfehler. Erst danach der volle Lauf. Der Smoke-Test
+in Lauf 1 hat genau dafür seinen Zweck erfüllt und ein hartes Hindernis
+aufgedeckt (OpenAI-Kontingent erschöpft, HTTP 429 `insufficient_quota` — die
+Studie hätte in diesem Zustand auch für echte Teilnehmer keine Antwort erzeugt).
 
 ---
 
@@ -111,17 +115,22 @@ laufen echt parallel (im Browser unmöglich — eine Browser-Pane pro Session).
 
 Pro Lauf:
 
-1. **Setup-Agent** — schreibt die aktuelle Prompt-Version in die lokale D1,
-   legt 8 Konversationen an (`POST /api/researcher/invite`, `mode: "ai"`),
-   Label-Konvention `RUNnn-Fnn-<Persona>` (Disziplin aus
+1. **Setup** — legt 8 Konversationen an (`POST /api/researcher/invite`,
+   `mode: "ai"`) und gibt jeder die aktuelle Promptversion als
+   `system_prompt`-Override mit. Label-Konvention
+   `ZZ-PROMPTTEST-RUNnn-Fnn-<Persona>-<Stressachse>` (Disziplin aus
    [nn-finding.md:32](nn-finding.md:32): Label = eindeutiger Schlüssel).
 2. **8 Runner-Subagenten parallel** — je ein Fall, strikt in der Rolle, nur
    Deutsch, **kein Urteilen**. Output: reines Transkript.
-   Harte Kappe **45 Teilnehmer-Nachrichten**; Abbruch mit Vermerk statt Endlos.
+   Harte Kappe **70 Teilnehmer-Nachrichten**; Abbruch mit Vermerk statt Endlos.
+   Wird eine Sitzung unterbrochen, setzt ein frischer Runner sie aus dem
+   Transkript heraus fort — die Konversation liegt in der DB, es geht nichts
+   verloren.
 3. **8 Rater-Subagenten parallel** — lesen je ein fertiges Transkript gegen
-   Rubrik + Prompt + Regressionsliste. Kennen die Stressachse, aber nicht die
-   Meinung des Runners.
-4. **Synthese-Agent** — dedupliziert über die 8 Ratings, sortiert nach
+   [rubric.md](rubric.md) + Prompt + Regressionsliste. Kennen die Stressachse,
+   aber nicht die Meinung des Runners. Ergebnis je Fall:
+   `runs/runNN-<persona>-<1|2>-findings.md`.
+4. **Synthese** — dedupliziert über die 8 Ratings, sortiert nach
    Schwere × Häufigkeit, schreibt `NN_findings_improvements.md`.
 
 Runner und Rater sind getrennte Agenten — wer eine Rolle spielt, ist ein
@@ -182,7 +191,7 @@ ehrlich berichtet (Restliste + Einschätzung, was strukturell und nicht per
 Prompt lösbar ist) statt weiter zu churnen. 🔵-Findings blockieren die
 Konvergenz nicht; sie werden gesammelt und am Ende gebündelt entschieden.
 
-**Protokoll je Lauf: `NN_findings_improvements.md`** (`01_`, `02_`, …) mit
+**Protokoll je Lauf: `\runNN-(name)-(1/2)-findings.md` und `NN_findings_improvements.md`** (`01_`, `02_`, …) mit
 jeweils vier Teilen:
 
 1. **Verwendete Promptversion** — Datei, Länge, vollständiger Wortlaut als
@@ -193,47 +202,3 @@ jeweils vier Teilen:
    und Zugnummer.
 4. **Regressionsprüfung** — jedes früher behobene Finding, explizit als
    „weiterhin behoben" oder „zurückgekehrt" ausgewiesen.
-
----
-
-## 6. Zertifizierungslauf (Deliverable „8 saubere Coachings")
-
-Erst nach Konvergenz, gegen den **eingefrorenen** finalen Prompt, mit **frischen**
-Konversationen:
-
-- Alle 8 Fälle vollständig, Label `ZZ-PROMPTTEST-CERT-Fnn-<Persona>`.
-- **Über die API, alle 8 parallel** — so entschieden. Die UI-Pfade sind in
-  [nn-finding.md](nn-finding.md) bereits separat verifiziert; zertifiziert wird
-  hier die Coachingqualität, und die ist über beide Transporte identisch.
-- Ergebnis: 8 Transkripte + ein Zertifizierungsbericht, der die Rubrik
-  fallweise als erfüllt ausweist.
-
----
-
-## 7. Aufräumen
-
-Nicht optional — [nn-finding.md:88](nn-finding.md:88) beschreibt exakt den
-Schaden, den liegengebliebene Testdaten anrichten.
-
-- Alle Iterationsläufe laufen lokal; die lokale D1 wird nach Abschluss geleert.
-- Produktion: kein Schreibzugriff, also nichts aufzuräumen.
-- Ausgeliefert werden: `prompts/coach-alex.vN.md`, `prompts/CHANGELOG.md`,
-  `NN_findings_improvements.md` je Lauf, `personas/`, die 8 CERT-Transkripte,
-  der Zertifizierungsbericht.
-- Der finale Prompt wird **nicht** automatisch nach Produktion geschrieben —
-  das ist eine bewusste Entscheidung des Studienleiters, kein Skript-Schritt.
-
----
-
-## Was dieser Plan gegenüber dem Ausgangsvorschlag ändert
-
-| Ausgangsvorschlag | hier | warum |
-|---|---|---|
-| Neustart bei *jeder* Auffälligkeit | Lauf zu Ende, Findings bündeln, *eine* Revision | sonst wird Phase 4/5 nie erreicht; ~5× weniger Läufe |
-| Persona urteilt selbst | Runner spielt, Rater bewertet | Rollenkonflikt, Rauschen |
-| „wirkt komisch" | Rubrik A–H + Schweregrad + Belegpflicht | sonst Churn auf Rauschen, Regressionen unsichtbar |
-| Achse = Lebenszeitpunkt | zusätzlich Stressachse pro Fall | Lebenszeitpunkt variiert das Thema, nicht die Mechanik |
-| Browser für alles | API, alle 8 parallel | Stunden reines Warten; nur eine Browser-Pane; UI ist separat verifiziert |
-| Prompt global setzen | Per-Chat-Override je Testgespräch | ein echter Teilnehmer darf keine Zwischenversion sehen |
-| Prompt nur in D1 | versionierte Files + Changelog | ohne Diff keine Iteration |
-| kein Stoppkriterium | 0🔴/0🟡 + 0 Regressionen, Deckel 10 | „perfekt" ist nicht falsifizierbar |
