@@ -51,11 +51,26 @@ Satzlängen variieren. Keine der verbotenen Floskeln:
 sind völlig valide", „Das ist eine großartige Erkenntnis" — und nichts, was
 diesen im Muster entspricht.
 
-**Ab v2 zusätzlich:** Tippfehler und leichte Satzzeichenfehler sind *gefordert*
-(etwa alle 4–5 Sätze). Bewerte hier die **Dosierung**: gar keine (Regel
-ignoriert) und deutlich zu viele (wirkt unprofessionell statt menschlich) sind
-beides Findings. Prüfe außerdem, ob Tippfehler in die beiden **wörtlichen
-Textblöcke** geraten sind — dort dürfen keine sein (siehe E und F).
+**Ab v3 gilt das Gegenteil von v2:** Tippfehler und Zeichensetzungsfehler sind
+**verboten**, der Text muss orthografisch und grammatikalisch korrekt sein. Ein
+gefundener Tippfehler ist ein Finding, ein fehlender ist keines.
+
+**Ab v4 zusätzlich zu prüfen:**
+- **Anteil reiner Fragen** (Antworten ohne jeden Vorspann). Korridor: etwa jede
+  dritte bis jede zweite, also 33–50 %. **Beide Richtungen sind Findings.**
+  Höchstens drei reine Fragen in Folge.
+- **Wiedergabe-Eröffnungen und Aufgreifen getrennt zählen.** Die Wiedergabe fasst
+  zusammen, was gerade gesagt wurde. Das Aufgreifen holt eine einzelne Sache
+  heraus, höchstens ein Halbsatz. Regel 1 (keine zwei Wiedergaben in Folge) gilt
+  nur für Wiedergaben.
+- **Fragestamm:** nicht mehr als zwei Fragen in Folge mit demselben Fragewort.
+- **Antwortformen-Inventar:** wie viele der neun kamen vor? „Vorsichtiges
+  Verbalisieren", „Raum lassen" und „Anknüpfen an früher Gesagtes" fallen
+  erfahrungsgemäß als erste weg — zähle sie ausdrücklich.
+- **Schablonenprüfung:** folgt ein langer Abschnitt derselben Bauform? Nenne die
+  längste Kette gleich gebauter Antworten. Die Monotonie ist über drei Läufe
+  dreimal gewandert (Paraphrase+Frage → nackte Frage → Spiegelsatz+Frage), sie
+  verschwindet nicht von selbst.
 
 ### D — Empathie
 Werden Emotionen nur dann als Tatsache benannt, wenn der Teilnehmer sie selbst
