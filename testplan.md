@@ -19,17 +19,22 @@ gezählt.
 Der Human-Arm und die Researcher-UI sind hier *nicht* im Scope (die deckt
 [nn-finding.md](nn-finding.md) ab).
 
-**Umgebung: lokale Instanz**, nicht Produktion.
+**Umgebung: Produktion** (`coach-alex.kaiwerther.workers.dev`, produktive D1) —
+so entschieden, die Testgespräche sollen in der produktiven Datenbank liegen.
 
-| | lokal (`wrangler dev`, lokale D1) | Produktion |
-|---|---|---|
-| Studiendaten | unberührt | **8+ Testgespräche pro Lauf im Funnel** |
-| Worker-Code | inkl. der noch uncommitteten Fixes (Self-Heal, Silent-Send, Composer-Lock) | alter Stand |
-| Prompt/Modell | 1:1 aus Prod gespiegelt | — |
-| Kosten | identisch (echter OpenAI-Key) | identisch |
+Daraus folgen zwei nicht verhandelbare Vorkehrungen:
 
-Produktion wird **ausschließlich lesend** angefasst (einmalig: Prompt + Modell
-exportieren). Kein Schreibzugriff, keine Testgespräche.
+- **Der globale Prompt wird während der Iteration nicht angefasst.** Jede
+  Testkonversation bekommt ihre Promptversion über den
+  Per-Chat-Override mit (`system_prompt` in `/api/researcher/invite`,
+  [src/index.js:380](src/index.js:380)). Sonst bekäme ein echter Teilnehmer —
+  die Einladung für TN069 ist raus — beim Öffnen seines Links die gerade
+  laufende Zwischenversion. `config.model` (`gpt-5.5`) bleibt ebenfalls
+  unberührt.
+- **Label-Präfix `ZZ-PROMPTTEST-`** für jede Testkonversation, damit sie in
+  Liste, Funnel und Export einen Filter entfernt sind. Aufräumen nach *jedem*
+  Lauf, nicht erst am Ende ([nn-finding.md:88](nn-finding.md:88) beschreibt den
+  Schaden liegengebliebener Testdaten).
 
 ### Schritt 0.1 — Prompt unter Versionskontrolle
 
@@ -172,10 +177,22 @@ Nach jedem Lauf **eine** gebündelte Revision, nicht eine pro Finding:
 - 0 × 🔴 und 0 × 🟡 über alle 8 Fälle, **und**
 - 0 Regressionen auf der Regressionsliste.
 
-**Deckel: 5 Iterationsläufe.** Wird bis dahin nicht konvergiert, wird das
+**Deckel: 10 Iterationsläufe.** Wird bis dahin nicht konvergiert, wird das
 ehrlich berichtet (Restliste + Einschätzung, was strukturell und nicht per
 Prompt lösbar ist) statt weiter zu churnen. 🔵-Findings blockieren die
 Konvergenz nicht; sie werden gesammelt und am Ende gebündelt entschieden.
+
+**Protokoll je Lauf: `NN_findings_improvements.md`** (`01_`, `02_`, …) mit
+jeweils vier Teilen:
+
+1. **Verwendete Promptversion** — Datei, Länge, vollständiger Wortlaut als
+   Anhang, damit jeder Lauf ohne Git-Archäologie nachvollziehbar ist.
+2. **Änderungen gegenüber dem Vorlauf** — Diff in Prosa, jede Änderung mit der
+   Finding-ID, die sie adressiert.
+3. **Findings dieses Laufs** — nach Schwere sortiert, je mit Fallnummer, Zitat
+   und Zugnummer.
+4. **Regressionsprüfung** — jedes früher behobene Finding, explizit als
+   „weiterhin behoben" oder „zurückgekehrt" ausgewiesen.
 
 ---
 
@@ -184,10 +201,10 @@ Konvergenz nicht; sie werden gesammelt und am Ende gebündelt entschieden.
 Erst nach Konvergenz, gegen den **eingefrorenen** finalen Prompt, mit **frischen**
 Konversationen:
 
-- Alle 8 Fälle vollständig, Label `CERT-Fnn-<Persona>`.
-- **Browser-getrieben** über die echte Teilnehmer-UI — hier ist die
-  UI-Realitätstreue der Punkt, und der Zeitaufwand ist einmalig statt pro
-  Iteration. Läuft sequenziell (eine Browser-Pane).
+- Alle 8 Fälle vollständig, Label `ZZ-PROMPTTEST-CERT-Fnn-<Persona>`.
+- **Über die API, alle 8 parallel** — so entschieden. Die UI-Pfade sind in
+  [nn-finding.md](nn-finding.md) bereits separat verifiziert; zertifiziert wird
+  hier die Coachingqualität, und die ist über beide Transporte identisch.
 - Ergebnis: 8 Transkripte + ein Zertifizierungsbericht, der die Rubrik
   fallweise als erfüllt ausweist.
 
@@ -216,7 +233,7 @@ Schaden, den liegengebliebene Testdaten anrichten.
 | Persona urteilt selbst | Runner spielt, Rater bewertet | Rollenkonflikt, Rauschen |
 | „wirkt komisch" | Rubrik A–H + Schweregrad + Belegpflicht | sonst Churn auf Rauschen, Regressionen unsichtbar |
 | Achse = Lebenszeitpunkt | zusätzlich Stressachse pro Fall | Lebenszeitpunkt variiert das Thema, nicht die Mechanik |
-| Browser für alles | API für Iteration, Browser für Zertifizierung | Stunden reines Warten; nur eine Browser-Pane |
-| Ziel implizit Produktion | lokal, Prod nur lesend | schützt laufende Studie und den Funnel |
+| Browser für alles | API, alle 8 parallel | Stunden reines Warten; nur eine Browser-Pane; UI ist separat verifiziert |
+| Prompt global setzen | Per-Chat-Override je Testgespräch | ein echter Teilnehmer darf keine Zwischenversion sehen |
 | Prompt nur in D1 | versionierte Files + Changelog | ohne Diff keine Iteration |
-| kein Stoppkriterium | 0🔴/0🟡 + 0 Regressionen, Deckel 5 | „perfekt" ist nicht falsifizierbar |
+| kein Stoppkriterium | 0🔴/0🟡 + 0 Regressionen, Deckel 10 | „perfekt" ist nicht falsifizierbar |
