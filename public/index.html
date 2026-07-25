@@ -124,6 +124,25 @@ function addBubble(role, content) {
   return row;
 }
 
+// Sending stays open while a reply is pending: participants can add a second
+// thought at any time, identically in AI and human mode (blinding). The typing
+// dots below are the only signal that a reply is on its way; the send button
+// is disabled solely while the input is empty.
+
+// A truncated or unknown invite link (e-mail clients mangle long URLs) must
+// fail loudly: swap in the error screen and stop the poll loop, instead of
+// leaving a live-looking composer that silently swallows messages.
+let dead = false;
+let pollTimer = null;
+function showInvalidLink() {
+  if (dead) return;
+  dead = true;
+  if (pollTimer) clearInterval(pollTimer);
+  document.querySelector(".app").innerHTML =
+    '<div class="empty"><div class="avatar">A</div><h2>Link ungültig</h2>' +
+    '<p>Dieser Chat-Link scheint ungültig zu sein. Bitte öffne den Einladungslink genau so, wie du ihn erhalten hast.</p></div>';
+}
+
 // Typing indicator: shown whenever the participant is waiting for a reply
 // (i.e. the latest message is theirs). Identical for AI and human modes, so it
 // never reveals which one is answering. Always kept at the bottom of the log.
@@ -143,13 +162,24 @@ function setTyping(on) {
   }
 }
 
+// Single-flight: the interval and the post-send poll can otherwise overlap,
+// and two responses carrying the same message would render it twice.
+let pollInFlight = false;
+
 async function poll() {
+  if (dead || pollInFlight) return;
+  pollInFlight = true;
+  // Abort a hung poll after 8s — on flaky mobile networks a fetch can other-
+  // wise stall for minutes and block all further polls via the in-flight flag.
+  const abort = new AbortController();
+  const abortTimer = setTimeout(() => abort.abort(), 8000);
   try {
-    const r = await fetch(`/api/chat?c=${encodeURIComponent(c)}&after=${lastId}`);
-    if (r.status === 404) { statusEl.textContent = "nicht verfügbar"; return; }
+    const r = await fetch(`/api/chat?c=${encodeURIComponent(c)}&after=${lastId}`, { signal: abort.signal });
+    if (r.status === 404) { showInvalidLink(); return; }
     const data = await r.json();
     for (const m of data.messages || []) {
-      lastId = Math.max(lastId, m.id);
+      if (m.id <= lastId) continue; // already rendered by an earlier poll
+      lastId = m.id;
       if (m.role === "user" && pendingEchoes > 0) { pendingEchoes--; lastRole = "user"; continue; }
       setTyping(false);
       addBubble(m.role, m.content);
@@ -158,27 +188,53 @@ async function poll() {
     setTyping(lastRole === "user");
     if (!log.querySelector(".row") && !typingEl) showEmptyState();
   } catch (e) { /* transient */ }
+  finally { clearTimeout(abortTimer); pollInFlight = false; }
 }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (dead) return;
   const text = input.value.trim();
   if (!text) return;
   input.value = "";
   input.style.height = "auto";
-  sendBtn.disabled = true;
-  addBubble("user", text);
+  sendBtn.disabled = true; // input is empty again
+  const prevRole = lastRole;
+  const row = addBubble("user", text);
   lastRole = "user";
   pendingEchoes++;
   setTyping(true); // show immediately, before the reply arrives
+
+  // The message never reached the server: undo the optimistic bubble and give
+  // the text back, so it isn't silently lost while the dots run forever.
+  const rollback = () => {
+    row.remove();
+    pendingEchoes--;
+    lastRole = prevRole;
+    if (!input.value) input.value = text;
+    sendBtn.disabled = input.value.trim().length === 0;
+    setTyping(lastRole === "user");
+    if (!log.querySelector(".row") && !typingEl) showEmptyState();
+  };
+
   try {
-    await fetch("/api/chat", {
+    const r = await fetch("/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ c, content: text }),
     });
-    await poll();
-  } catch (e) {}
+    if (r.status === 404) { showInvalidLink(); return; } // link is broken/unknown
+    if (!r.ok) {
+      rollback();
+    } else {
+      // Even on aiError (reply generation failed server-side) the message is
+      // stored and the server self-heals — and sending stays open anyway.
+      await r.json().catch(() => ({}));
+      await poll();
+    }
+  } catch (e) {
+    rollback();
+  }
   input.focus();
 });
 
@@ -194,7 +250,10 @@ input.addEventListener("keydown", (e) => {
 sendBtn.disabled = true;
 showEmptyState();
 poll();
-setInterval(poll, 2500);
+pollTimer = setInterval(poll, 2500);
+// Catch up immediately when the tab returns to the foreground (phone unlock,
+// tab switch) instead of waiting for the throttled interval.
+document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
 </script>
 </body>
 </html>

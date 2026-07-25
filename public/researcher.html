@@ -44,7 +44,9 @@
   .nav-item .count.zero { display: none; }
 
   .list-label { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
-                color: var(--muted); padding: 16px 22px 8px; }
+                color: var(--muted); padding: 16px 22px 8px; display: flex; align-items: center;
+                justify-content: space-between; gap: 8px; }
+  #selectToggle { text-transform: none; letter-spacing: 0; font-size: 12px; padding: 3px 10px; }
   #list { overflow-y: auto; flex: 1; padding: 0 10px 12px; }
   .conv { padding: 11px 12px; border-radius: var(--r-sm); cursor: pointer; transition: background .12s; }
   .conv:hover { background: var(--line-2); }
@@ -58,6 +60,21 @@
                    white-space: nowrap; margin-top: 3px; }
   .side-foot { border-top: 1px solid var(--line); padding: 10px; display: flex; gap: 8px; }
   .side-foot .btn { flex: 1; }
+
+  /* selection mode (bulk delete / export) */
+  .conv .check { display: none; width: 16px; height: 16px; border: 1.5px solid var(--muted);
+                 border-radius: 5px; flex: none; position: relative; background: #fff; }
+  #app.selecting .conv .check { display: inline-block; }
+  .conv.selected { background: var(--brand-soft); }
+  .conv.selected .check { background: var(--brand); border-color: var(--brand); }
+  .conv.selected .check::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px;
+                                 height: 8px; border: solid #fff; border-width: 0 2px 2px 0;
+                                 transform: rotate(45deg); }
+  .select-bar { display: none; border-top: 1px solid var(--line); padding: 10px; align-items: center; gap: 6px; }
+  #app.selecting .select-bar { display: flex; }
+  #app.selecting .side-foot { display: none; }
+  .select-bar .n { flex: 1; font-size: 12px; font-weight: 600; color: var(--ink-2);
+                   padding-left: 4px; white-space: nowrap; }
 
   /* ---------- main ---------- */
   main { display: flex; flex-direction: column; min-height: 0; background: var(--bg); }
@@ -74,6 +91,8 @@
                font-family: var(--font); font-size: 11px; font-weight: 600; border-radius: 6px;
                padding: 1px 8px; cursor: pointer; flex: none; }
   .link-copy:hover { background: var(--line-2); color: var(--ink); }
+  .btn-danger { color: var(--danger); }
+  .btn-danger:hover:not(:disabled) { background: var(--danger-soft); color: var(--danger); }
   .mobile-back { display: none; }
 
   /* overview */
@@ -109,6 +128,17 @@
   .qrow .qwait span { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
   .queue-empty { padding: 44px 20px; text-align: center; color: var(--muted); }
   .queue-empty .big { font-size: 30px; margin-bottom: 8px; }
+
+  /* changelog */
+  #changelog { flex: 1; overflow-y: auto; padding: 26px; }
+  #changelog .h { font-size: 13px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+                  color: var(--muted); margin: 0 0 14px; }
+  .cl-card { background: #fff; border: 1px solid var(--line); border-radius: var(--r);
+             box-shadow: var(--sh-sm); padding: 8px 20px; margin-bottom: 28px; max-width: 680px; }
+  .cl-item { padding: 13px 0; border-bottom: 1px solid var(--line-2); }
+  .cl-item:last-child { border-bottom: none; }
+  .cl-item .t { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .cl-item .d { font-size: 13px; color: var(--ink-2); margin-top: 3px; line-height: 1.5; }
 
   /* thread */
   #thread { flex: 1; overflow-y: auto; padding: 22px 26px; display: flex; flex-direction: column; gap: 2px; }
@@ -194,9 +224,22 @@
         Übersicht
         <span class="count zero" id="waitCount">0</span>
       </div>
+      <div class="nav-item" id="navChangelog">
+        <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6zM19 3v4M17 5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Was ist neu
+      </div>
     </div>
-    <div class="list-label">Gespräche</div>
+    <div class="list-label">
+      <span>Gespräche</span>
+      <button class="btn btn-ghost btn-sm" id="selectToggle" type="button">Auswählen</button>
+    </div>
     <div id="list"></div>
+    <div class="select-bar" id="selectBar">
+      <span class="n" id="selCount">0 ausgewählt</span>
+      <button class="btn btn-ghost btn-sm" id="selJson" disabled>JSON</button>
+      <button class="btn btn-ghost btn-sm" id="selCsv" disabled>CSV</button>
+      <button class="btn btn-ghost btn-sm btn-danger" id="selDelete" disabled>Löschen</button>
+    </div>
     <div class="side-foot">
       <button class="btn btn-ghost btn-sm" id="settingsBtn">Einstellungen</button>
       <button class="btn btn-ghost btn-sm" id="exportJsonBtn">JSON</button>
@@ -228,6 +271,18 @@
       </div>
     </div>
 
+    <!-- CHANGELOG -->
+    <div id="changelogWrap" style="display:none;flex-direction:column;min-height:0;flex:1;">
+      <div class="main-head">
+        <button class="btn btn-ghost btn-sm mobile-back" data-back>‹ Zurück</button>
+        <div>
+          <div class="mh-title">Was ist neu</div>
+          <div class="mh-sub" style="font-family:var(--font);">Neue Funktionen &amp; Änderungen</div>
+        </div>
+      </div>
+      <div id="changelog"></div>
+    </div>
+
     <!-- THREAD -->
     <div id="threadWrap" style="display:none;flex-direction:column;min-height:0;flex:1;">
       <div class="main-head">
@@ -240,8 +295,12 @@
             <button class="link-copy" id="hCopy" type="button" title="Einladungslink kopieren">Kopieren</button>
           </div>
         </div>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-          <span style="font-size:12px;color:var(--muted);font-weight:600;">Modus</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-ghost btn-sm" id="hExportJson" title="Dieses Gespräch als JSON exportieren">JSON</button>
+          <button class="btn btn-ghost btn-sm" id="hExportCsv" title="Dieses Gespräch als CSV exportieren">CSV</button>
+          <button class="btn btn-ghost btn-sm" id="hExportDocx" title="Dieses Gespräch als Word-Datei exportieren">Word</button>
+          <button class="btn btn-ghost btn-sm btn-danger" id="hDelete" title="Gespräch endgültig löschen">Löschen</button>
+          <span style="font-size:12px;color:var(--muted);font-weight:600;margin-left:8px;">Modus</span>
           <div class="segmented" id="modeToggle">
             <button data-mode="ai">KI</button>
             <button data-mode="human">Mensch</button>
@@ -303,8 +362,12 @@
 <script>
 let PW = sessionStorage.getItem("alex_pw") || "";
 let currentId = null;
-let view = "overview"; // 'overview' | 'thread'
+let view = "overview"; // 'overview' | 'thread' | 'changelog'
 let threadTimer = null, overviewTimer = null;
+let threadMessages = []; // last-loaded messages, for the per-message copy buttons
+let threadHtml = ""; // fingerprint of the last-rendered thread (skips no-op re-renders)
+let selecting = false; // sidebar selection mode for bulk delete / export
+const selectedIds = new Set();
 
 const $ = (id) => document.getElementById(id);
 async function api(path, opts = {}) {
@@ -318,6 +381,50 @@ function escapeHtml(s) {
 const MODE_LABEL = { ai: "KI", human: "Mensch" };
 const SENDER_LABEL = { participant: "Teilnehmer", ai: "KI", researcher: "Forscher" };
 function modeLabel(m) { return MODE_LABEL[m] || m; }
+// "Was ist neu" — newest entry first; rendered once into #changelog.
+const CHANGELOG = [
+  {
+    date: "23.07.2026",
+    items: [
+      { t: "Klare Fehlermeldung bei ungültigem Link",
+        d: "Teilnehmende mit einem abgeschnittenen oder ungültigen Einladungslink sehen jetzt eine deutliche Fehlerseite — statt eines leeren Chats, der Nachrichten stillschweigend verschluckt." },
+      { t: "Senden während des Wartens",
+        d: "Teilnehmende können jetzt weitere Nachrichten senden, während sie auf die Antwort des Coaches warten — in beiden Modi identisch (Verblindung bleibt gewahrt), der Tipp-Indikator bleibt sichtbar." },
+      { t: "Ruhige Gesprächsansicht",
+        d: "Die Gesprächsansicht scrollt nicht mehr von selbst alle paar Sekunden: Sie aktualisiert sich nur noch bei tatsächlichen Änderungen und behält die Scroll-Position bei." },
+      { t: "Ausgebliebene KI-Antworten kommen automatisch nach",
+        d: "Bleibt im KI-Modus eine Antwort aus — etwa weil die Verbindung der Teilnehmenden mitten im Senden abbricht oder die KI kurzzeitig nicht erreichbar ist — wird sie nach einer Minute automatisch erneut erzeugt. Bisher blieb der Chat in diesem Fall stehen, bis jemand von Hand eingegriffen hat." },
+    ],
+  },
+  {
+    date: "20.07.2026",
+    items: [
+      { t: "Mehrfachauswahl",
+        d: "Über „Auswählen“ oberhalb der Gesprächsliste lassen sich mehrere Gespräche markieren und gemeinsam löschen oder als JSON/CSV exportieren." },
+      { t: "Word-Export",
+        d: "Jedes Gespräch lässt sich über den „Word“-Button im Gesprächskopf als .docx exportieren — ohne Zeitstempel, mit Leerzeile zwischen den Nachrichten und fett markierten Sprechern (Teilnehmer / Coach Alex)." },
+    ],
+  },
+  {
+    date: "19.07.2026",
+    items: [
+      { t: "Gespräche löschen",
+        d: "Über den „Löschen“-Button im Gesprächskopf lässt sich ein Gespräch nach einer Sicherheitsabfrage endgültig entfernen — inklusive aller Nachrichten." },
+      { t: "Einzel-Export",
+        d: "Die JSON- und CSV-Buttons im Gesprächskopf exportieren nur das geöffnete Gespräch; der Dateiname folgt der Bezeichnung." },
+      { t: "Dynamische Antwort-Verzögerung",
+        d: "Die KI-Antwortverzögerung skaliert jetzt mit der Antwortlänge: kurze Antworten kommen nach ca. 3 Sekunden, lange proportional später (max. 60 s) — statt bisher fix mindestens 8 s." },
+      { t: "Zeitstempel & Nachrichten kopieren",
+        d: "Jede Nachricht in der Gesprächsansicht zeigt Datum und Uhrzeit inklusive Sekunden und hat einen Kopieren-Button, der Zeitstempel, Absender und Inhalt in die Zwischenablage kopiert." },
+      { t: "„Was ist neu“-Seite",
+        d: "Diese Seite — hier werden künftig alle neuen Funktionen und Änderungen aufgelistet." },
+    ],
+  },
+];
+function fmtTs(t) {
+  return new Date(t).toLocaleString("de-DE", { day: "2-digit", month: "2-digit",
+    year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
 function fmtWait(ms) {
   const s = Math.floor(ms / 1000);
   if (s < 60) return "gerade eben";
@@ -356,7 +463,9 @@ function showOverview() {
   view = "overview"; currentId = null;
   $("overviewWrap").style.display = "flex";
   $("threadWrap").style.display = "none";
+  $("changelogWrap").style.display = "none";
   $("navOverview").classList.add("active");
+  $("navChangelog").classList.remove("active");
   $("app").classList.remove("viewing");
   document.querySelectorAll(".conv.active").forEach((e) => e.classList.remove("active"));
   loadAnalytics();
@@ -368,7 +477,9 @@ function showThread(id) {
   view = "thread"; currentId = id;
   $("overviewWrap").style.display = "none";
   $("threadWrap").style.display = "flex";
+  $("changelogWrap").style.display = "none";
   $("navOverview").classList.remove("active");
+  $("navChangelog").classList.remove("active");
   $("app").classList.add("viewing");
   if (overviewTimer) clearInterval(overviewTimer);
   loadThread(true);
@@ -376,8 +487,35 @@ function showThread(id) {
   threadTimer = setInterval(() => loadThread(false), 2500);
   loadList();
 }
+function showChangelog() {
+  view = "changelog"; currentId = null;
+  $("overviewWrap").style.display = "none";
+  $("threadWrap").style.display = "none";
+  $("changelogWrap").style.display = "flex";
+  $("navOverview").classList.remove("active");
+  $("navChangelog").classList.add("active");
+  $("app").classList.remove("viewing");
+  document.querySelectorAll(".conv.active").forEach((e) => e.classList.remove("active"));
+  if (threadTimer) clearInterval(threadTimer);
+  if (overviewTimer) clearInterval(overviewTimer);
+}
 $("navOverview").addEventListener("click", showOverview);
+$("navChangelog").addEventListener("click", showChangelog);
 $("refreshBtn").addEventListener("click", loadAnalytics);
+
+/* ---------- changelog (static, rendered once) ---------- */
+function renderChangelog() {
+  $("changelog").innerHTML = CHANGELOG.map((e) => `
+    <p class="h">${escapeHtml(e.date)}</p>
+    <div class="cl-card">
+      ${e.items.map((it) => `
+        <div class="cl-item">
+          <div class="t">${escapeHtml(it.t)}</div>
+          <div class="d">${escapeHtml(it.d)}</div>
+        </div>`).join("")}
+    </div>`).join("");
+}
+renderChangelog();
 document.querySelectorAll("[data-back]").forEach((b) =>
   b.addEventListener("click", () => { $("app").classList.remove("viewing"); }));
 
@@ -426,10 +564,14 @@ async function loadList() {
   const r = await api("/api/researcher/conversations");
   if (!r.ok) return;
   const { conversations } = await r.json();
+  // Prune selected ids whose conversations no longer exist (deleted elsewhere).
+  const alive = new Set(conversations.map((c) => c.id));
+  [...selectedIds].forEach((id) => { if (!alive.has(id)) selectedIds.delete(id); });
   const list = $("list");
   list.innerHTML = conversations.map((c) => `
-    <div class="conv ${c.id === currentId ? "active" : ""}" data-id="${c.id}">
+    <div class="conv ${c.id === currentId ? "active" : ""}${selectedIds.has(c.id) ? " selected" : ""}" data-id="${c.id}">
       <div class="l1">
+        <span class="check"></span>
         <span class="label">${escapeHtml(c.label || "Ohne Bezeichnung")}</span>
         ${c.last_role === "user" ? '<span class="wait-dot" title="wartet auf Antwort"></span>' : ""}
         <span class="badge badge-${c.mode} badge-dot">${modeLabel(c.mode)}</span>
@@ -437,8 +579,54 @@ async function loadList() {
       <div class="preview">${c.msg_count} Nachr. · ${escapeHtml((c.last_content || "noch keine Nachrichten").slice(0, 52))}</div>
     </div>`).join("");
   list.querySelectorAll(".conv").forEach((el) =>
-    el.addEventListener("click", () => showThread(el.dataset.id)));
+    el.addEventListener("click", () => {
+      if (!selecting) return showThread(el.dataset.id);
+      // Selection mode: rows toggle instead of opening the thread.
+      const id = el.dataset.id;
+      if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+      el.classList.toggle("selected", selectedIds.has(id));
+      updateSelectBar();
+    }));
+  if (selecting) updateSelectBar(); // pruning may have changed the count
 }
+
+/* ---------- selection mode (bulk delete / export) ---------- */
+function setSelecting(on) {
+  selecting = on;
+  if (!on) {
+    selectedIds.clear();
+    document.querySelectorAll(".conv.selected").forEach((el) => el.classList.remove("selected"));
+  }
+  $("app").classList.toggle("selecting", on);
+  $("selectToggle").textContent = on ? "Fertig" : "Auswählen";
+  updateSelectBar();
+}
+function updateSelectBar() {
+  const n = selectedIds.size;
+  $("selCount").textContent = n + " ausgewählt";
+  $("selJson").disabled = !n;
+  $("selCsv").disabled = !n;
+  $("selDelete").disabled = !n;
+}
+$("selectToggle").addEventListener("click", () => setSelecting(!selecting));
+$("selJson").addEventListener("click", () => { if (selectedIds.size) download("json", selectedIds); });
+$("selCsv").addEventListener("click", () => { if (selectedIds.size) download("csv", selectedIds); });
+$("selDelete").addEventListener("click", async () => {
+  const ids = [...selectedIds];
+  if (!ids.length) return;
+  const msg = ids.length === 1
+    ? "1 Gespräch endgültig löschen? Alle Nachrichten gehen verloren."
+    : `${ids.length} Gespräche endgültig löschen? Alle Nachrichten gehen verloren.`;
+  if (!confirm(msg)) return;
+  await api("/api/researcher/delete-conversation", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ids }),
+  });
+  const openDeleted = ids.includes(currentId);
+  setSelecting(false);
+  if (openDeleted) showOverview();
+  loadList();
+});
 
 /* ---------- thread ---------- */
 async function loadThread(scroll) {
@@ -456,17 +644,32 @@ async function loadThread(scroll) {
     : "Mensch-Modus — deine Antwort wird als Coach Alex gesendet.";
 
   const thread = $("thread");
-  const atBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 80;
-  thread.innerHTML = messages.map((m) => {
+  threadMessages = messages;
+  const html = messages.map((m) => {
     const scheduled = m.visible_at > Date.now();
     return `<div class="trow ${m.role}"><div class="tbubble">
       <div class="b">${escapeHtml(m.content)}</div>
       <div class="tmeta"><span class="who ${m.sender}">${SENDER_LABEL[m.sender] || m.sender}</span>
         ${scheduled ? '<span class="sched">geplant</span>' : ""}
-        <span>${new Date(m.created_at).toLocaleTimeString("de-DE", {hour:"2-digit",minute:"2-digit"})}</span>
+        <span>${fmtTs(m.created_at)}</span>
+        <button class="link-copy msg-copy" type="button" data-mid="${m.id}" title="Nachricht kopieren">Kopieren</button>
       </div></div></div>`;
   }).join("");
-  if (scroll || atBottom) thread.scrollTop = thread.scrollHeight;
+  // Re-render only when the content actually changed: replacing identical
+  // innerHTML every 2.5s slowly perturbs the scroll position on its own.
+  // The "geplant" badge depends on Date.now(), so a badge flip changes the
+  // string and triggers exactly one re-render. When the researcher is not at
+  // the bottom, their scroll position is restored explicitly.
+  if (html !== threadHtml) {
+    const atBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 80;
+    const prevTop = thread.scrollTop;
+    threadHtml = html;
+    thread.innerHTML = html;
+    if (scroll || atBottom) thread.scrollTop = thread.scrollHeight;
+    else thread.scrollTop = prevTop;
+  } else if (scroll) {
+    thread.scrollTop = thread.scrollHeight;
+  }
 }
 
 $("hCopy").addEventListener("click", () => {
@@ -474,6 +677,30 @@ $("hCopy").addEventListener("click", () => {
   navigator.clipboard.writeText(location.origin + "/?c=" + currentId);
   $("hCopy").textContent = "Kopiert ✓";
   setTimeout(() => { $("hCopy").textContent = "Kopieren"; }, 1500);
+});
+
+/* Per-message copy — delegated on #thread so it survives the 2.5s re-renders;
+   content is looked up from threadMessages by id, never from the DOM. */
+$("thread").addEventListener("click", (e) => {
+  const btn = e.target.closest(".msg-copy");
+  if (!btn) return;
+  const m = threadMessages.find((x) => x.id === Number(btn.dataset.mid));
+  if (!m) return;
+  const who = SENDER_LABEL[m.sender] || m.sender;
+  navigator.clipboard.writeText(`[${fmtTs(m.created_at)}] ${who} (${m.role}): ${m.content}`);
+  btn.textContent = "✓";
+  setTimeout(() => { btn.textContent = "Kopieren"; }, 1200); // btn may be re-rendered away — harmless
+});
+
+$("hDelete").addEventListener("click", async () => {
+  if (!currentId) return;
+  const label = $("hLabel").textContent || "Ohne Bezeichnung";
+  if (!confirm(`Gespräch "${label}" endgültig löschen? Alle Nachrichten gehen verloren.`)) return;
+  await api("/api/researcher/delete-conversation", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ id: currentId }),
+  });
+  showOverview(); loadList();
 });
 
 $("modeToggle").addEventListener("click", async (e) => {
@@ -553,15 +780,29 @@ $("settingsSave").addEventListener("click", async () => {
   $("settingsModal").classList.remove("on");
 });
 
-/* ---------- export ---------- */
-async function download(format) {
-  const r = await api("/api/researcher/export?format=" + format);
+/* ---------- export (all conversations, one id, or a Set/array of ids) ---------- */
+async function download(format, ids) {
+  let url = "/api/researcher/export?format=" + format;
+  if (ids) {
+    const arr = typeof ids === "string" ? [ids] : [...ids];
+    if (arr.length) url += "&ids=" + encodeURIComponent(arr.join(","));
+  }
+  const r = await api(url);
+  if (!r.ok) return;
   const blob = await r.blob();
+  // Take the server-chosen filename (label slug) from content-disposition.
+  const cd = r.headers.get("content-disposition") || "";
+  const match = cd.match(/filename="([^"]+)"/);
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = "coach-alex-export." + format; a.click();
+  a.href = URL.createObjectURL(blob);
+  a.download = match ? match[1] : "coach-alex-export." + format;
+  a.click();
 }
 $("exportJsonBtn").addEventListener("click", () => download("json"));
 $("exportCsvBtn").addEventListener("click", () => download("csv"));
+$("hExportJson").addEventListener("click", () => { if (currentId) download("json", currentId); });
+$("hExportCsv").addEventListener("click", () => { if (currentId) download("csv", currentId); });
+$("hExportDocx").addEventListener("click", () => { if (currentId) download("docx", currentId); });
 
 /* close modals on backdrop click */
 document.querySelectorAll(".modal").forEach((m) =>

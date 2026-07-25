@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   mode          TEXT NOT NULL DEFAULT 'ai',   -- 'ai' | 'human'
   label         TEXT,                    -- optional note for researchers (e.g. participant #)
   system_prompt TEXT,                    -- per-chat override; NULL => use global config
-  created_at    INTEGER NOT NULL
+  created_at    INTEGER NOT NULL,
+  ai_attempt_at INTEGER                  -- when the last AI generation attempt started (self-heal lock)
 );
 
 CREATE TABLE IF NOT EXISTS messages (
