@@ -134,6 +134,15 @@ In jedem Lauf explizit als „weiterhin behoben" oder „zurückgekehrt" ausweis
 | ID | Befund | seit |
 |----|--------|------|
 | R-1 | Phase 4 „Beispielfragen:" ohne Inhalt (Überschrift steht, Liste fehlt) — kostet der WILL-Phase ihre Muster für Konkretisierung und Hindernisprüfung | in v2 zurückgekehrt, war in v1 behoben |
+| R-2 | Anteil reiner Fragen unter dem Korridor (bis 7 %) plus his-Wort-Ketten über drei in Folge in emotional dichten oder Drift-Passagen — Kollision Pflicht-Vorspann (Regel 3/4) gegen Fragenboden (Regel 2/5) | in v6 adressiert (Kollisionsregel), ab run04-F07/F08 |
+| R-3 | Mehr als zwei Impuls-Blöcke pro Sitzung unter Ratsuchend-Dauerdruck; Rückfall-Regel wird bei wiederholten Bitten nicht gezogen | in v6 adressiert (harter Deckel), ab run04-F01 |
+| R-4 | Drei oder mehr Fragen in Folge mit demselben Fragewort — in v7 auf „Was" verengt gefixt, in v8 als „Welche"/„Wie" zurückgekehrt (loop-i08) | in v9 generalisiert auf alle Fragewörter |
+| R-5 | Verabschiedung erzählt den Plan/die Entscheidung/die Einsicht des Benutzers nach oder formuliert seine Selbstzusammenfassung um. **Kein R-5-Verstoß:** ein warmer, in die Zukunft gerichteter Wunsch, der die Lage berührt („Ruhe für das Gespräch"), solange er den Inhalt nicht nacherzählt (v10-Präzisierung) | in v8 adressiert, in v10 präzisiert, ab run04-F02/loop-i05 |
+| R-6 | Mehr als drei nackte Fragen in Folge, vor allem in Phase 4 (Konkretisierung) — Nebenwirkung des Fragenbodens aus v6 | in v9 adressiert (Streak-Deckel in Phase 4), ab loop-i08 |
+| R-7 | His-Wort-Eröffnungskette über drei hinaus (bis 10) in Drift-/dichten Gesprächen — Kollisionsbremse aus v6 greift zu spät | in v10 geschärft (Zähl-und-Stopp), ab loop-i10 |
+| R-8 | Anrede wechselt sitzungsweit ins „Sie", obwohl Studie und Prompt „du" verwenden — Prompt hatte kein Anrede-Mandat | in v13 adressiert (Anrede-Mandat „du"), ab loop-i20 |
+| R-9 | Semikolon am Regel-4-Park-Halbsatz („merke ich mir; …"), doppelt verboten, stochastischer Rückfall trotz Pre-Send-Check | in v13 adressiert (Punkt statt Semikolon am Halbsatz), ab loop-i20 |
+| R-10 | Ein vom Benutzer wiederholt angebotener Verlust/Tod/Endpunkt wird geparkt statt mit der Ereignisfrage geöffnet; der verdeckte Kern der Sitzung bleibt komplett verschlossen | in v14 adressiert (Verlust ist stärkster Zeitmarker, Ereignisfrage nicht optional), ab loop-i21 |
 | S-5 | Tippfehler im wörtlichen Verblindungstext oder in der Krisenmeldung | offen, ab v2 |
 | S-1 | Kein Auftakt/Kontrakt zu Beginn (Working Alliance „Task") | offen seit v1 |
 | S-2 | Kein Längen- oder Turn-Budget, Phase 2 kann endlos laufen | offen seit v1 |

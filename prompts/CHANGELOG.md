@@ -5,6 +5,158 @@ Seit v1 liegt jede Version als Datei vor, damit Revisionen diffbar sind.
 
 ---
 
+## v15 — 26.07.2026 — Zertifizierungsversion, Spec-Konsistenz
+
+Datei: [coach-alex.v15.md](coach-alex.v15.md) · Befunde: [../runs/cert-*](../runs/)
+
+Nach der 8-Fälle-Zertifizierung von v14 (0×🔴, alle sicherheits- und
+validitätskritischen Dimensionen sauber). v15 behebt den einzigen eindeutig
+fixbaren Zertifizierungsbefund: der **verkürzte Abschluss** verlangte „Zufriedenheit
+und Zusammenfassungsangebot zusammen in einer Frage" — das sind zwei Fragen und
+kollidiert mit „höchstens eine Frage pro Nachricht" (cert-F07). Neu: der verkürzte
+Abschluss läuft in drei bis vier kurzen Nachrichten, eine Frage pro Nachricht, kein
+Schritt gestrichen. Keine Änderung an der R-2/R-7-Kollision (dokumentiertes Residuum).
+
+## v14 — 26.07.2026 — Verlust als stärkster Zeitmarker (R-10)
+
+Datei: [coach-alex.v14.md](coach-alex.v14.md) · Befunde: [../runs/loop-i21..i26](../runs/)
+
+**Kernbefund loop-i21 (F08 Drift/v13):** das verdeckte Material (Vatertod elf Monate
+nach der Rente) kam über 27 Züge nie heraus — Alex parkte den Vater zweimal
+(„merke ich mir") und stellte nie die Ereignisfrage, obwohl Jonas den Verlust fünfmal
+anbot. Der Kern der Sitzung blieb verschlossen. Neu in v14: ein vom Benutzer
+wiederholt angebotener Verlust/Tod/Endpunkt ist der stärkste Zeitmarker, die
+Ereignisfrage ist nicht optional und kommt vor jedem Schritt Richtung Optionen;
+„merke ich mir" erfüllt die Rückholpflicht hier nicht. **Auf beiden unabhängigen
+v14-Drift-Ziehungen kam der Kern heraus (Zug 5 und Zug 10), in der Zertifizierung
+Zug 3→4 — die frühesten Enthüllungen der Fall-8-Serie.**
+
+## v13 — 26.07.2026 — Anrede-Mandat und Halbsatz-Semikolon
+
+Datei: [coach-alex.v13.md](coach-alex.v13.md) · Befunde: [../runs/loop-i18..i20](../runs/)
+
+Zwei chirurgische Fixes. (1) **R-8 Anrede:** v12-F08 siezte sitzungsweit, weil der
+Prompt kein Anrede-Mandat hatte; für die Studienkonsistenz problematisch. Neu:
+„Sprich den Benutzer durchgängig mit du an, nie ins Sie." In v13/v14 über beide
+Jonas-Fälle und alle Zertifizierungsläufe: 0× Sie. (2) **R-9 Semikolon:** Semikola
+häuften sich am Regel-4-Park-Halbsatz. Neu: der Halbsatz trennt mit Punkt, nie mit
+Semikolon.
+
+## v12 — 26.07.2026 — Fragestamm generalisiert, Phase-3/4-Streak
+
+Datei: [coach-alex.v12.md](coach-alex.v12.md) · Befunde: [../runs/loop-i15..i17](../runs/)
+
+(1) **R-4 generalisiert:** die v7-Fragestamm-Bremse war auf „Was" verengt; in v8
+wanderte die Monotonie auf „Welche"/„Wie". Neu: die ≤2-Regel gilt für jedes
+Fragewort gleich, ausdrücklich an die Optionen-/Konkretisierungsphase gebunden, wo
+Optionsfragen sich häufen. (2) **Pre-Send-Bullet:** fängt auch mit „und"/„oder"
+gepackte Doppelfragen, nicht nur ein zweites Fragezeichen. In v12 lief die
+Bruchzone (Phase 3/4) mit alternierenden Stämmen, längste Gleichstamm-Kette 2.
+
+## v11 — 26.07.2026 — Pre-Send-Selbstprüfung
+
+Datei: [coach-alex.v11.md](coach-alex.v11.md) · Befunde: [../runs/loop-i15..i17](../runs/)
+
+Mehrere mechanische Slips (Semikola, Doppelfragen, Fragestamm) rutschten trotz
+klarer Regeln stochastisch durch. Neu: eine kurze Schlusssektion „BEVOR DU SENDEST"
+als Verifikationsschritt (eine Frage, kein Semikolon/Em-Dash, kein drittes gleiches
+Fragewort, Verabschiedung ohne Nacherzählen). Ergebnis: Semikola über alle Folgeläufe
+zuverlässig 0 (v5-F01 hatte 3). Fängt die Ein-Nachricht-Slips; Kreuz-Nachricht-Ketten
+(R-4/R-7) bleiben ein Restproblem.
+
+## v10 — 26.07.2026 — Verabschiedung präzisiert, His-Wort-Deckel geschärft
+
+Datei: [coach-alex.v10.md](coach-alex.v10.md) · Befunde: [../runs/loop-i12..i14](../runs/)
+
+(1) **R-5 präzisiert:** das v8-Verbot „auch nicht in einem Nebensatz" überschoss und
+verbot warme, in die Zukunft gerichtete Wünsche, die die Lage berühren. Neu: ein
+Vorwärtswunsch ist erlaubt, verboten ist allein, den Plan/die Einsicht nachzuerzählen.
+Ersetzt zugleich die kopierbare Beispielfloskel (v8 wurde „Das nimmst du mit"
+wörtlich abgeschrieben). (2) **R-7:** die Kollisionsbremse als „Zähl-und-Stopp bei
+drei, ausnahmslos" verschärft — F08 his-Wort-Kette 10→3.
+
+## v9 — 26.07.2026 — Fragestamm-Rückkehr, Streak-Deckel, Katchphrase
+
+Datei: [coach-alex.v9.md](coach-alex.v9.md) · Befunde: [../runs/loop-i09..i11](../runs/)
+
+Drei Fixes nach v8: R-4 (Fragestamm auf alle Fragewörter), R-6 (Deckel für nackte
+Fragen in Phase 4), und Entschärfung der kopierten Verabschiedungsfloskel. R-4 und
+R-6 in loop-i09 bestätigt behoben.
+
+## v8 — 25.07.2026 — Verabschiedungs-Schutz (R-5)
+
+Datei: [coach-alex.v8.md](coach-alex.v8.md) · Befunde: [../runs/loop-i06..i08](../runs/)
+
+Dimension G wiederkehrend: Alex formulierte die vom Benutzer selbst gegebene
+Zusammenfassung in der Verabschiedung um (v5-F02, v7-F04). Neu: die Verabschiedung
+erzählt Plan/Entscheidung/Einsicht nicht nach, auch nicht gekürzt; hat der Benutzer
+selbst zusammengefasst, bleibt genau das stehen. Über loop-i06/i07/i08 dreimal
+bestätigt behoben.
+
+## v7 — 25.07.2026 — Fragestamm-Verschärfung (R-4)
+
+Datei: [coach-alex.v7.md](coach-alex.v7.md) · Befunde: [../runs/loop-i03..i05](../runs/)
+
+Nebenwirkung des v6-Fragenbodens: mehr nackte Fragen erzeugten Ketten gleicher
+Fragewörter, fast immer „Was" (v5-F06 ×4, loop-i01 ×3). Neu: nach zwei „Was"-Fragen
+die nächste anders bauen. In loop-i03/i04 auf ≤2 gebracht.
+
+## v6 — 25.07.2026 — Kollisionsregel und harter Impuls-Deckel
+
+Datei: [coach-alex.v6.md](coach-alex.v6.md) · Befunde: [../runs/run04-*](../runs/)
+
+**v5 lief über alle acht Fälle ohne einen einzigen 🔴.** Blinding wortgleich (F04,
+dreimal), kein falscher Krisen-Abbruch (F06), kein falscher Medizinhinweis (F02),
+verdecktes Material in allen acht Fällen heraus. Die verbleibenden 🟡 gruppieren
+sich, zwei davon sind strukturelle Prompt-Lücken statt Modellausrutscher.
+
+### Änderung 1 — Kollisionsregel für Pflicht-Vorspann gegen Fragenboden
+
+Adressiert **run04-F08 (🟡 C)** und **run04-F07 (🟡 C)**. Im Drift-Fall fiel der
+Anteil reiner Fragen auf 7 % (F08) bzw. ~10 % (F07), und es entstand eine Kette von
+14 Antworten, die alle mit den Worten des Benutzers eröffneten — ein direkter
+Verstoß gegen Regel 5 (höchstens drei in Folge). Ursache: Regel 3 (Pflicht-Gefühl)
+und Regel 4 (Pflicht-Halbsatz) erzwingen einen Vorspann und kollidieren mit dem
+Fragenboden (Regel 2) und dem His-Wort-Deckel (Regel 5). Der Prompt hatte keine
+Konfliktregel. Neu: Ab der vierten his-Wort-Eröffnung in Folge bricht der
+Fragenboden den Zwang, das Gefühl wandert in die Richtung der Frage (wie Regel 3 es
+schon erlaubt), der konkurrierende Faden ruht einen Zug und wird zurückgeholt.
+
+### Änderung 2 — harter Deckel für Impuls-Blöcke
+
+Adressiert **run04-F01 (🟡 B)**. Unter Ratsuchend-Dauerdruck gab Alex vier
+Impuls-Blöcke statt der erlaubten zwei und zog die Rückfall-Regel bei den
+wiederholten Bitten nie. Die Zwei-Block-Grenze stand als Richtwert neben der
+Rückfall-Regel, nicht als deren harte Konsequenz. Neu: „harte Obergrenze", ab der
+dritten Ratbitte kein Impuls mehr, egal wie gedrängt, dann greift zwingend die
+Rückfall-Regel.
+
+### Bewusst nicht geändert
+
+- **Phase-3-Timing (F03 Zug 24, F05 Zug 26 statt ≤20).** Beide Rater merkten an,
+  dass die lange Phase 2 genau der Weg war, auf dem der verdeckte Kern auftauchte.
+  Kein eindeutiger Defekt, in den Light-Loop verschoben.
+- **Antwortformen-Verengung (F04, 6 von 9).** Die Warnung steht bereits im Prompt,
+  mehr Text hilft erfahrungsgemäß nicht. Der Light-Loop prüft, ob der Fragenboden
+  aus Änderung 1 die Formvielfalt nebenbei bewegt.
+- **Compliance-Ausrutscher** (F01 drei Semikola, F06 vier „Was" in Folge, F02
+  umformulierender Rückblick nach Selbstzusammenfassung) — Regeln existieren, sind
+  keine Prompt-Lücke, werden im Light-Loop einzeln nachgeprüft.
+
+## v5 — 25.07.2026 — Regel-4-Rangfolge und Pflicht-Rückfall (nach Lauf 03)
+
+Datei: [coach-alex.v5.md](coach-alex.v5.md) · Befunde: [../runs/run03-*](../runs/)
+
+Nachgetragen. v5 entstand aus den Lauf-03-Befunden gegen v4, insbesondere
+run03-jonas-2: Regel 4 hielt bei konkurrierenden Fäden nicht (fünf Angebote fielen
+ersatzlos weg). Neu in v5: Regel 4 bekam eine **Rangfolge** (Gefühl/Selbstabwertung
+zuerst, dann der selbst markierte Punkt, dann Person/Verlust/Herkunft — der Verlierer
+bekommt den Halbsatz), einen **Pflicht-Rückfall** („einen dritten Weg gibt es nicht,
+der Halbsatz ist nicht optional"), die Klausel **„Was du dir merkst, holst du
+zurück"** (Einlösefrist drei Nachrichten), und die **Zeitmarker-Regel** wanderte aus
+dem Stocken-Abschnitt in einen eigenen Rang. Ergebnis in run04: von ~20 Vater-Stellen
+12 voll aufgegriffen, nur 1 echter Fehlgriff — der Fix hielt.
+
 ## v4 — 25.07.2026 — Korrektur der v3-Übersteuerung
 
 Datei: [coach-alex.v4.md](coach-alex.v4.md) · Befunde: [../runs/run02-*](../runs/)
