@@ -5,7 +5,8 @@ from an LLM or a human researcher. One page for participants (invite-link only),
 one dashboard for researchers.
 
 - **German UI**, no streaming, no AI tells. LLM replies arrive after a natural,
-  human-like delay (thinking pause + typing time scaled to length, up to ~1 min),
+  human-like delay (reading the incoming message + thinking pause + typing time
+  at a realistic ~50 WPM, scaled to length, up to ~75 s),
   implemented via a `visible_at` timestamp: the reply is generated immediately but
   only shown once that time passes.
 - **"typing…" indicator in both modes.** As soon as the participant sends a

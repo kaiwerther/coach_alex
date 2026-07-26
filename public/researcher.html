@@ -379,10 +379,24 @@ function escapeHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 const MODE_LABEL = { ai: "KI", human: "Mensch" };
-const SENDER_LABEL = { participant: "Teilnehmer", ai: "KI", researcher: "Forscher" };
+const SENDER_LABEL = { participant: "Teilnehmer", ai: "KI", researcher: "Forscher", welcome: "Begrüßung" };
 function modeLabel(m) { return MODE_LABEL[m] || m; }
 // "Was ist neu" — newest entry first; rendered once into #changelog.
 const CHANGELOG = [
+  {
+    date: "26.07.2026",
+    items: [
+      { t: "Begrüßung zu Gesprächsbeginn",
+        d: "Jedes neue Gespräch startet jetzt mit einer festen Begrüßung von Coach Alex, sodass Teilnehmende empfangen werden, bevor sie selbst schreiben. Gilt für KI- und Forscher-Modus. Die inhaltliche Rahmung (Coaching mit Fragen statt Ratschlägen) folgt unverändert in Alex' erster echter Antwort." },
+    ],
+  },
+  {
+    date: "26.07.2026",
+    items: [
+      { t: "Natürlichere Antwortzeit im KI-Modus",
+        d: "Die KI-Antwortverzögerung war bisher zu kurz — Antworten kamen für viele Teilnehmende erkennbar zu schnell und wirkten dadurch maschinell. Die Verzögerung berücksichtigt jetzt auch die Länge der eingehenden Nachricht (Lesen), eine längere Denkpause vor dem Tippen sowie eine realistische Tippgeschwindigkeit von ca. 50 WPM statt bisher ca. 218 WPM. Kurze Antworten kommen nun nach ca. 20 s, mittlere nach ca. 45 s, lange nach höchstens 75 s." },
+    ],
+  },
   {
     date: "23.07.2026",
     items: [

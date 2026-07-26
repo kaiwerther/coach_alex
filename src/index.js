@@ -10,6 +10,15 @@ const json = (data, status = 200) =>
 
 const now = () => Date.now();
 
+// Fixed opening message from Coach Alex, shown before the participant writes.
+// Hardcoded (not model-generated) so every participant gets an identical, warm
+// greeting. It deliberately does NOT set the frame ("I work with questions, not
+// advice…") — the system prompt's GESPRÄCHSERÖFFNUNG does that in Alex's first
+// real reply, so putting it here too would double it up.
+const WELCOME_MESSAGE =
+  "Hallo und herzlich willkommen. Schön, dass du dir die Zeit für dieses Gespräch nimmst.\n\n" +
+  "Erzähl mir gern zum Einstieg, was dich gerade beschäftigt.";
+
 // ---- config helpers --------------------------------------------------------
 
 async function getConfig(env, key, fallback = null) {
@@ -29,14 +38,19 @@ async function setConfig(env, key, value) {
 }
 
 // ---- natural delay ---------------------------------------------------------
-// Human-like pause that scales with reply length: short replies arrive after
-// a few seconds, long ones take proportionally longer (reading + typing time).
-// Clamped so a participant never waits absurdly long.
-function replyDelayMs(text) {
-  const think = 1500 + Math.random() * 1500;   // reading / thinking pause
-  const perChar = 55 * (0.85 + Math.random() * 0.3); // typing speed w/ jitter
-  const d = think + text.length * perChar;
-  return Math.min(Math.max(d, 2500), 60000);
+// Human-like latency that scales with both the incoming message and the reply.
+// Three components, matching how a human coach actually replies:
+//   1. read  — notice + read the participant's message (scales with its length)
+//   2. think — compose pause before typing begins
+//   3. type  — typing time at a realistic ~50 WPM (~220 ms/char, with jitter)
+// The old model typed at ~55 ms/char (~218 WPM, ~5x human), so replies arrived
+// almost instantly and read as an AI tell. Clamped so nobody waits absurdly long.
+function replyDelayMs(replyText, userText = "") {
+  const read  = 800 + (userText ? userText.length : 0) * 20; // notice + read
+  const think = 2000 + Math.random() * 4000;                 // 2–6 s compose pause
+  const perChar = 220 * (0.8 + Math.random() * 0.4);         // ~176–264 ms/char
+  const d = read + think + replyText.length * perChar;
+  return Math.min(Math.max(d, 4000), 75000);
 }
 
 // ---- OpenAI ----------------------------------------------------------------
@@ -86,10 +100,10 @@ async function generateAiReply(env, conversation) {
 // Generate a reply and store it. The visible_at delay is anchored to the
 // user's message time, so generation time does not stack on top of the
 // artificial delay — and a self-healed (late) reply becomes visible at once.
-async function generateAndStoreReply(env, conv, userMsgAt) {
+async function generateAndStoreReply(env, conv, userMsgAt, userText = "") {
   try {
     const reply = await generateAiReply(env, conv);
-    const visibleAt = Math.max(now(), userMsgAt + replyDelayMs(reply));
+    const visibleAt = Math.max(now(), userMsgAt + replyDelayMs(reply, userText));
     await insertMessage(env, conv.id, "assistant", reply, "ai", visibleAt);
     return true;
   } catch (err) {
@@ -149,7 +163,7 @@ async function handleParticipantGet(request, env, ctx) {
   // by an atomic lock on ai_attempt_at so concurrent polls can't double-fire.
   if (conv.mode === "ai") {
     const last = await env.DB.prepare(
-      "SELECT role, created_at FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1"
+      "SELECT role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1"
     )
       .bind(c)
       .first();
@@ -162,7 +176,7 @@ async function handleParticipantGet(request, env, ctx) {
         .run();
       if (lock.meta.changes === 1) {
         console.log("Self-heal: regenerating stalled reply for", c);
-        ctx.waitUntil(generateAndStoreReply(env, conv, last.created_at));
+        ctx.waitUntil(generateAndStoreReply(env, conv, last.created_at, last.content));
       }
     }
   }
@@ -195,7 +209,7 @@ async function handleParticipantPost(request, env, ctx) {
       .run();
     // waitUntil keeps the generation alive even if the participant's phone
     // drops the connection mid-request — the reply still gets stored.
-    const gen = generateAndStoreReply(env, conv, userMsgAt);
+    const gen = generateAndStoreReply(env, conv, userMsgAt, content);
     ctx.waitUntil(gen);
     const ok = await gen;
     return json(ok ? { ok: true } : { ok: true, aiError: true });
@@ -390,6 +404,11 @@ async function handleResearcher(request, env, path) {
     )
       .bind(id, mode, label, systemPrompt, now())
       .run();
+    // Seed the fixed welcome as the first message (both ai and human mode), so
+    // the participant is greeted the moment they open the link. visible_at = now
+    // means no typing delay on the opener. sender 'welcome' keeps it out of the
+    // participant-message funnel counts.
+    await insertMessage(env, id, "assistant", WELCOME_MESSAGE, "welcome", now());
     return json({ ok: true, id, mode });
   }
 
